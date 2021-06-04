@@ -1,0 +1,329 @@
+query:
+  preload:
+    id: GET_NEW_PIECE_ID
+    name: Получение новых PIECE_ID
+    setup_query:
+    transform_script: C:\work\quality_management_systems\asamm\reader\scripts\transform_scripts\GET_NEW_COILS.py
+    query: SELECT
+          COIL_ID,
+          PIECE_ID
+          FROM HSM_CM_COIL_OUTPUT hcco
+          WHERE hcco.INSERT_DATE > SYSDATE
+  load:
+    - id: HSM_RHF_REP_DISC_PROD_INFO
+      name: Получение данных из таблицы HSM_RHF_REP_DISC_PROD_INFO
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script: C:\work\quality_management_systems\asamm\reader\scripts\transform_scripts\HSM_RHF_REP_DISC_PROD_INFO_TRANSFORM.py
+      query: SELECT
+          BILL_ID as "RHF_PROD_INFO_BILL_ID",
+          TF_ID as "RHF_PROD_INFO_TF_ID",
+          OXY as "RHF_PROD_INFO_OXY",
+          DIS_AVE_TEMP as "RHF_PROD_INFO_DIS_AVE_TEMP",
+          CHG_AVE_TEMP as "RHF_PROD_INFO_CHG_AVE_TEMP",
+          PIECE_ID as "RHF_PROD_INFO_PIECE_ID",
+          PIECE_ID2 as "RHF_PROD_INFO_PIECE_ID2",
+          AIR_OXYGEN_2_AVE as "RHF_PROD_INFO_AIR_OXYGEN_2_AVE",
+          AIR_OXYGEN_2_STD as "RHF_PROD_INFO_AIR_OXYGEN_2_STD",
+          PYRO_TEMP_AVE as "RHF_PROD_INFO_PYRO_TEMP_AVE",
+          MDL_TEMP_TOP as "RHF_PROD_INFO_MDL_TEMP_TOP"
+          FROM HSM_RHF_REP_DISC_PROD_INFO
+          WHERE HSM_RHF_REP_DISC_PROD_INFO.PIECE_ID2 IS NOT NULL AND
+          HSM_RHF_REP_DISC_PROD_INFO.PIECE_ID2 IN ({{pieceIdList|join(", ")}})
+
+    - id: HSM_RHF_REP_DISC_LZONE_INFO
+      name: Получение данных из таблицы HSM_RHF_REP_DISC_LZONE_INFO
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script: C:\work\quality_management_systems\asamm\reader\scripts\transform_scripts\HSM_RHF_REP_DISC_LZONE_INFO_TRANSFORM.py
+      query: WITH RHF
+          AS(
+          SELECT
+          BILL_ID AS B ,
+          TF_ID AS T
+          FROM HSM_RHF_REP_DISC_PROD_INFO
+          WHERE HSM_RHF_REP_DISC_PROD_INFO.PIECE_ID2 is not null AND HSM_RHF_REP_DISC_PROD_INFO.PIECE_ID2 IN ({{pieceIdList|join(", ")}})
+          )
+          SELECT
+          BILL_ID as "RHF_LZONE_INFO_BILL_ID",
+          TF_ID as "RHF_LZONE_INFO_TF_ID",
+          LZONE_ID as "RHF_LZONE_INFO_LZONE_ID",
+          AVE_TEMP as "RHF_LZONE_INFO_AVE_TEMP",
+          BOT_TEMP as "RHF_LZONE_INFO_BOT_TEMP",
+          CORE_TEMP as "RHF_LZONE_INFO_CORE_TEMP",
+          TOP_TEMP as "RHF_LZONE_INFO_TOP_TEMP",
+          HEAT_TIME as "RHF_LZONE_INFO_HEAT_TIME",
+          ZONE_TEMP_MAX as "RHF_LZONE_INFO_ZONE_TEMP_MAX",
+          ZONE_TEMP_MIN as "RHF_LZONE_INFO_ZONE_TEMP_MIN",
+          ZONE_TEMP_AVG as "RHF_LZONE_INFO_ZONE_TEMP_AVG",
+          ZONE_SP_MAX as "RHF_LZONE_INFO_ZONE_SP_MAX",
+          ZONE_SP_MIN as "RHF_LZONE_INFO_ZONE_SP_MIN",
+          ZONE_SP_AVG as "RHF_LZONE_INFO_ZONE_SP_AVG",
+          ZONE_LMTD as "RHF_LZONE_INFO_ZONE_LMTD"
+          FROM HSM_RHF_REP_DISC_LZONE_INFO, RHF
+          WHERE RHF.B = HSM_RHF_REP_DISC_LZONE_INFO.BILL_ID AND RHF.T = HSM_RHF_REP_DISC_LZONE_INFO.TF_ID
+
+    - id: HSM_TEMPERATURES
+      name: Получение данных из таблицы HSM_TEMPERATURES
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script: C:\work\quality_management_systems\asamm\reader\scripts\transform_scripts\HSM_TEMPERATURES_TRANSFORM.py
+      query: SELECT
+          PIECE_ID as "TEMPERATURES_PIECE_ID",
+          DEVICE_ID as "TEMPERATURES_DEVICE_ID",
+          AVG_SOURCE as "TEMPERATURES_AVG_SOURCE",
+          MIN_SOURCE as "TEMPERATURES_MIN_SOURCE",
+          MAX_SOURCE as "TEMPERATURES_MAX_SOURCE",
+          STD_DEV_SOURCE as "TEMPERATURES_STD_DEV_SOURCE",
+          BODY_AVG_VALUE as "TEMPERATURES_BODY_AVG_VALUE",
+          BODY_MIN_VALUE as "TEMPERATURES_BODY_MIN_VALUE",
+          BODY_MAX_VALUE as "TEMPERATURES_BODY_MAX_VALUE",
+          HEAD_AVG_VALUE as "TEMPERATURES_HEAD_AVG_VALUE",
+          HEAD_MIN_VALUE as "TEMPERATURES_HEAD_MIN_VALUE",
+          HEAD_MAX_VALUE as "TEMPERATURES_HEAD_MAX_VALUE",
+          TAIL_AVG_VALUE as "TEMPERATURES_TAIL_AVG_VALUE",
+          TAIL_MIN_VALUE as "TEMPERATURES_TAIL_MIN_VALUE",
+          TAIL_MAX_VALUE as "TEMPERATURES_TAIL_MAX_VALUE"
+          FROM HSM_TEMPERATURES
+          WHERE HSM_TEMPERATURES.PIECE_ID IS NOT NULL AND HSM_TEMPERATURES.PIECE_ID IN ({{pieceIdList|join(", ")}})
+
+    - id: HSM_SC_STAT_ROLLING
+      name: Получение данных из таблицы HSM_SC_STAT_ROLLING
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script: C:\work\quality_management_systems\asamm\reader\scripts\transform_scripts\HSM_SC_STAT_ROLLING_TRANSFORM.py
+      query: SELECT
+            PIECE_ID as "HSM_SC_STAT_ROLLING_PIECE_ID",
+            STAND_ID as "HSM_SC_STAT_ROLLING_STAND_ID",
+            SECTION as "HSM_SC_STAT_ROLLING_SECTION",
+            STAT_IDX as "HSM_SC_STAT_ROLLING_STAT_IDX",
+            EXIT_THICK as "HSM_SC_STAT_ROLLING_EXIT_THICK",
+            FORCE as "HSM_SC_STAT_ROLLING_FORCE",
+            TORQUE as "HSM_SC_STAT_ROLLING_TORQUE",
+            MOTOR_CURRENT as "HSM_SC_STAT_ROLLING_CURRENT",
+            SPEED as "HSM_SC_STAT_ROLLING_SPEED"
+            FROM HSM_SC_STAT_ROLLING
+            WHERE HSM_SC_STAT_ROLLING.STAND_ID <>'E1' AND
+            HSM_SC_STAT_ROLLING.STAND_ID <>'E2' AND
+            HSM_SC_STAT_ROLLING.STAT_IDX<>'STD' AND
+            HSM_SC_STAT_ROLLING.PIECE_ID IS NOT NULL AND
+            HSM_SC_STAT_ROLLING.PIECE_ID IN ({{pieceIdList|join(", ")}})
+
+    - id: HSM_CM_FURNACE_HIST
+      name: Получение данных из таблицы HSM_CM_FURNACE_HIST
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script: C:\work\quality_management_systems\asamm\reader\scripts\transform_scripts\HSM_CM_FURNACE_HIST_TRANSFORM.py
+      query: SELECT
+            PIECE_ID as "CM_FURNACE_PIECE_ID",
+            FURNACE as "CM_FURNACE_FURNACE",
+            TIME_IN_FRN as "CM_FURNACE_TIME_IN_FRN",
+            EXPECTED_TEMP as "CM_FURNACE_EXPECTED_TEMP",
+            DISCHARGE_TEMP as "CM_FURNACE_DISCHARGE_TEMP"
+            FROM HSM_CM_FURNACE_HIST
+            WHERE HSM_CM_FURNACE_HIST.PIECE_ID IN ({{pieceIdList|join(", ")}})
+
+    - id: HSM_COOLING_REPORT
+      name: Получение данных из таблицы HSM_COOLING_REPORT
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script:
+      query: SELECT
+            PIECE_ID as "COOLING_REP_PIECE_ID",
+            SPEED as "COOLING_REP_SPEED",
+            DC_TEMP_AVERAGE as "COOLING_REP_DC_TEMP_AVERAGE",
+            DC_TEMP_ST_DEV as "COOLING_REP_DC_TEMP_ST_DEV",
+            DC_PERC_IN_TOL as "COOLING_REP_DC_PERC_IN_TOL",
+            FINISHING_TEMP_TARG as "COOLING_REP_FIN_TEMP_TARG",
+            STRATEGY as "COOLING_REP_STRATEGY",
+            TOT_REQ_FLOW as "COOLING_REP_TOT_REQ_FLOW",
+            TOT_PROV_FLOW as "COOLING_REP_TOT_PROV_FLOW"
+            FROM HSM_COOLING_REPORT
+            WHERE HSM_COOLING_REPORT.PIECE_ID is not null AND
+            HSM_COOLING_REPORT.PIECE_ID IN ({{pieceIdList|join(", ")}})
+
+    - id: HSM_CM_COIL_OUTPUT
+      name: Получение данных из таблицы HSM_CM_COIL_OUTPUT
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script:
+      query: SELECT
+            PIECE_ID as "COIL_OUTPUT_PIECE_ID",
+            SLAB_ID as "COIL_OUTPUT_SLAB_ID",
+            COIL_ID as "COIL_OUTPUT_COIL_ID",
+            STEEL_GRADE as "COIL_OUTPUT_STEEL_GRADE",
+            ENTRY_THICK as "COIL_OUTPUT_ENTRY_THICK",
+            ENTRY_LENGTH as "COIL_OUTPUT_ENTRY_LENGTH",
+            ENTRY_HEAD_WIDTH as "COIL_OUTPUT_ENTRY_HEAD_WIDTH",
+            ENTRY_TAIL_WIDTH as "COIL_OUTPUT_ENTRY_TAIL_WIDTH",
+            ENTRY_WEIGHT as "COIL_OUTPUT_ENTRY_WEIGHT",
+            TARGET_THICK as "COIL_OUTPUT_TARGET_THICK",
+            TARGET_WIDTH as "COIL_OUTPUT_TARGET_WIDTH",
+            EXIT_FM_TEMP as "COIL_OUTPUT_EXIT_FM_TEMP",
+            EXIT_FM_POS_TOL as "COIL_OUTPUT_EXIT_FM_POS_TOL",
+            EXIT_FM_NEG_TOL as "COIL_OUTPUT_EXIT_FM_NEG_TOL",
+            EXIT_WW_TEMP as "COIL_OUTPUT_EXIT_WW_TEMP"
+            FROM HSM_CM_COIL_OUTPUT
+            WHERE HSM_CM_COIL_OUTPUT.PIECE_ID IS NOT NULL AND
+            HSM_CM_COIL_OUTPUT.PIECE_ID IN ({{pieceIdList|join(", ")}})
+
+    - id: MECH_TEST_CHEMISTRY
+      name: Получение данных из таблицы MECH_TEST_CHEMISTRY
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script:
+      query: SELECT
+            h.piece_id AS "PIECE_ID",
+            avg(case when r.element_code = 1 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_C",
+            avg(case when r.element_code = 2 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Si",
+            avg(case when r.element_code = 3 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Mn",
+            avg(case when r.element_code = 4 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_P",
+            avg(case when r.element_code = 5 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_S",
+            avg(case when r.element_code = 6 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Cr",
+            avg(case when r.element_code = 8 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Ni",
+            avg(case when r.element_code = 13 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Cu",
+            avg(case when r.element_code = 9 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Al",
+            avg(case when r.element_code = 27 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_N",
+            avg(case when r.element_code = 7 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Mo",
+            avg(case when r.element_code = 18 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_V",
+            avg(case when r.element_code = 14 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Nb",
+            avg(case when r.element_code = 15 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Pb",
+            avg(case when r.element_code = 17 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Ti",
+            avg(case when r.element_code = 39 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Aloxy",
+            avg(case when r.element_code = 10 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_As",
+            avg(case when r.element_code = 16 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Sn",
+            avg(case when r.element_code = 30 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Ca",
+            avg(case when r.element_code = 20 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Sb",
+            avg(case when r.element_code = 19 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Bi",
+            avg(case when r.element_code = 11 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_B",
+            avg(case when r.element_code = 24 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Zn",
+            avg(case when r.element_code = 38 then round(case when r.value < -99 then 0 else r.value end,decode(eg.round_digits,null,8,eg.round_digits)) else null end) AS "Chemistry_Alsol"
+            FROM level4.hsm_cm_coil_output h
+            LEFT JOIN (
+            SELECT r.heat_id, e.element_code, e.value
+            FROM level4.l3_reports r
+            INNER JOIN level4.l3_rep_elements e ON e.report_counter = r.report_counter
+            AND e.analysis_counter = (
+            SELECT max(ae.analysis_counter)
+            FROM level4.l3_rep_analysis ae
+            WHERE ae.report_counter = e.report_counter AND ae.analysis_date> r.start_date)
+            WHERE r.area_id = 1100
+            ) r ON r.heat_id = substr(h.coil_id,1,7)
+            LEFT JOIN (
+            SELECT p.piece_id, t1.element_code, t1.round_digits
+            FROM PIECE@OMK_MET_DWH.REGRESS.RDBMS.DEV.US.ORACLE.COM p
+            INNER JOIN MECH_CERT_GROUP_DETAIL@OMK_MET_DWH.REGRESS.RDBMS.DEV.US.ORACLE.COM mcgd
+            ON p.so_id = mcgd.so_id
+            AND p.so_line_id = mcgd.so_line_id
+            AND mcgd.cert_group_num_id = (
+            SELECT min(mcgd2.cert_group_num_id)
+            FROM MECH_CERT_GROUP_DETAIL@OMK_MET_DWH.REGRESS.RDBMS.DEV.US.ORACLE.COM mcgd2
+            WHERE mcgd2.so_id = mcgd.so_id)
+
+            INNER JOIN MECH_TEST_CHEMISTRY@OMK_MET_DWH.REGRESS.RDBMS.DEV.US.ORACLE.COM t1
+            ON t1.test_id = mcgd.test_id
+            WHERE p.PRODUCT_TYPE = 'HRC'
+            ) eg ON eg.piece_id = h.coil_id AND r.element_code = eg.element_code
+            WHERE h.piece_id IN ({{pieceIdList|join(", ")}})
+            GROUP BY h.piece_id
+
+    - id: HSM_AVERAGE_IC_COOLING
+      name: Получение данных из таблицы HSM_AVERAGE_IC_COOLING
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script:
+      query: SELECT
+            PIECE_ID as "AVERAGE_IC_PIECE_ID",
+            POINT_NUM as "AVERAGE_IC_POINT_NUM",
+            RELATIVEOFFSET as "AVERAGE_IC_RELATIVEOFFSET",
+            AVG_SPEED as "AVERAGE_IC_AVG_SPEED",
+            AVG_TOP_FLOW01 as "AVERAGE_IC_AVG_TOP_FLOW01",
+            AVG_TOP_FLOW02 as "AVERAGE_IC_AVG_TOP_FLOW02",
+            AVG_TOP_FLOW03 as "AVERAGE_IC_AVG_TOP_FLOW03",
+            AVG_TOP_FLOW04 as "AVERAGE_IC_AVG_TOP_FLOW04",
+            AVG_TOP_FLOW05 as "AVERAGE_IC_AVG_TOP_FLOW05",
+            AVG_TOP_FLOW06 as "AVERAGE_IC_AVG_TOP_FLOW06",
+            AVG_TOP_FLOW07 as "AVERAGE_IC_AVG_TOP_FLOW07",
+            AVG_TOP_FLOW08 as "AVERAGE_IC_AVG_TOP_FLOW08",
+            AVG_BOT_FLOW01 as "AVERAGE_IC_AVG_BOT_FLOW01",
+            AVG_BOT_FLOW02 as "AVERAGE_IC_AVG_BOT_FLOW02",
+            AVG_BOT_FLOW03 as "AVERAGE_IC_AVG_BOT_FLOW03",
+            AVG_BOT_FLOW04 as "AVERAGE_IC_AVG_BOT_FLOW04",
+            AVG_BOT_FLOW05 as "AVERAGE_IC_AVG_BOT_FLOW05",
+            AVG_BOT_FLOW06 as "AVERAGE_IC_AVG_BOT_FLOW06",
+            AVG_BOT_FLOW07 as "AVERAGE_IC_AVG_BOT_FLOW07",
+            AVG_BOT_FLOW08 as "AVERAGE_IC_AVG_BOT_FLOW08",
+            ENTRY_TEMPR_AVG as "AVERAGE_IC_ENTRY_TEMPR_AVG",
+            ENTRY_TEMPR_MIN as "AVERAGE_IC_ENTRY_TEMPR_MIN",
+            ENTRY_TEMPR_MAX as "AVERAGE_IC_ENTRY_TEMPR_MAX",
+            ENTRY_TEMPR_STDEV as "AVERAGE_IC_ENTRY_TEMPR_STDEV",
+            EXIT_TEMPR_AVG as "AVERAGE_IC_EXIT_TEMPR_AVG",
+            EXIT_TEMPR_MIN as "AVERAGE_IC_EXIT_TEMPR_MIN",
+            EXIT_TEMPR_MAX as "AVERAGE_IC_EXIT_TEMPR_MAX",
+            EXIT_TEMPR_STDEV as "AVERAGE_IC_EXIT_TEMPR_STDEV"
+            FROM HSM_AVERAGE_IC_COOLING
+            WHERE HSM_AVERAGE_IC_COOLING.PIECE_ID is not null AND
+            HSM_AVERAGE_IC_COOLING.PIECE_ID IN ({{pieceIdList|join(", ")}})
+
+    - id: HSM_AVERAGE_WW_COOLING
+      name: Получение данных из таблицы HSM_AVERAGE_WW_COOLING
+      setup_query: C:\work\quality_management_systems\asamm\reader\scripts\setup_query_scripts\SET_PIECE_IDS_FOR_QUERIES.py
+      transform_script:
+      query: SELECT
+            PIECE_ID as "AVERAGE_WW_PIECE_ID",
+            COIL_ID as "AVERAGE_WW_COIL_ID",
+            ENTRY_MAX_TEMP as "AVERAGE_WW_ENTRY_MAX_TEMP",
+            ENTRY_MIN_TEMP as "AVERAGE_WW_ENTRY_MIN_TEMP",
+            ENTRY_AVG_TEMP as "AVERAGE_WW_ENTRY_AVG_TEMP",
+            EXIT_MAX_TEMP1 as "AVERAGE_WW_EXIT_MAX_TEMP1",
+            EXIT_MIN_TEMP1 as "AVERAGE_WW_EXIT_MIN_TEMP1",
+            EXIT_AVG_TEMP1 as "AVERAGE_WW_EXIT_AVG_TEMP1",
+            EXIT_MAX_TEMP2 as "AVERAGE_WW_EXIT_MAX_TEMP2",
+            EXIT_MIN_TEMP2 as "AVERAGE_WW_EXIT_MIN_TEMP2",
+            EXIT_AVG_TEMP2 as "AVERAGE_WW_EXIT_AVG_TEMP2",
+            AVG_SPEED as "AVERAGE_WW_AVG_SPEED",
+            AVG_TOP_FLOW1 as "AVERAGE_WW_AVG_TOP_FLOW1",
+            AVG_BOT_FLOW1 as "AVERAGE_WW_AVG_BOT_FLOW1",
+            AVG_TOP_FLOW2 as "AVERAGE_WW_AVG_TOP_FLOW2",
+            AVG_BOT_FLOW2 as "AVERAGE_WW_AVG_BOT_FLOW2",
+            AVG_TOP_FLOW3 as "AVERAGE_WW_AVG_TOP_FLOW3",
+            AVG_BOT_FLOW3 as "AVERAGE_WW_AVG_BOT_FLOW3",
+            AVG_TOP_FLOW4 as "AVERAGE_WW_AVG_TOP_FLOW4",
+            AVG_BOT_FLOW4 as "AVERAGE_WW_AVG_BOT_FLOW4",
+            AVG_TOP_FLOW5 as "AVERAGE_WW_AVG_TOP_FLOW5",
+            AVG_BOT_FLOW5 as "AVERAGE_WW_AVG_BOT_FLOW5",
+            AVG_TOP_FLOW6 as "AVERAGE_WW_AVG_TOP_FLOW6",
+            AVG_BOT_FLOW6 as "AVERAGE_WW_AVG_BOT_FLOW6",
+            AVG_TOP_FLOW7 as "AVERAGE_WW_AVG_TOP_FLOW7",
+            AVG_BOT_FLOW7 as "AVERAGE_WW_AVG_BOT_FLOW7",
+            AVG_TOP_FLOW8 as "AVERAGE_WW_AVG_TOP_FLOW8",
+            AVG_BOT_FLOW8 as "AVERAGE_WW_AVG_BOT_FLOW8",
+            AVG_TOP_FLOW9 as "AVERAGE_WW_AVG_TOP_FLOW9",
+            AVG_BOT_FLOW9 as "AVERAGE_WW_AVG_BOT_FLOW9",
+            AVG_TOP_FLOW10 as "AVERAGE_WW_AVG_TOP_FLOW10",
+            AVG_BOT_FLOW10 as "AVERAGE_WW_AVG_BOT_FLOW10",
+            AVG_TOP_FLOW11 as "AVERAGE_WW_AVG_TOP_FLOW11",
+            AVG_BOT_FLOW11 as "AVERAGE_WW_AVG_BOT_FLOW11",
+            AVG_TOP_FLOW12 as "AVERAGE_WW_AVG_TOP_FLOW12",
+            AVG_BOT_FLOW12 as "AVERAGE_WW_AVG_BOT_FLOW12",
+            AVG_TOP_FLOW13 as "AVERAGE_WW_AVG_TOP_FLOW13",
+            AVG_BOT_FLOW13 as "AVERAGE_WW_AVG_BOT_FLOW13",
+            AVG_TOP_FLOW14 as "AVERAGE_WW_AVG_TOP_FLOW14",
+            AVG_BOT_FLOW14 as "AVERAGE_WW_AVG_BOT_FLOW14",
+            AVG_TOP_FLOW15 as "AVERAGE_WW_AVG_TOP_FLOW15",
+            AVG_BOT_FLOW15 as "AVERAGE_WW_AVG_BOT_FLOW15",
+            AVG_TOP_FLOW16 as "AVERAGE_WW_AVG_TOP_FLOW16",
+            AVG_BOT_FLOW16 as "AVERAGE_WW_AVG_BOT_FLOW16",
+            AVG_TOP_FLOW17 as "AVERAGE_WW_AVG_TOP_FLOW17",
+            AVG_BOT_FLOW17 as "AVERAGE_WW_AVG_BOT_FLOW17",
+            AVG_TOP_FLOW18 as "AVERAGE_WW_AVG_TOP_FLOW18",
+            AVG_BOT_FLOW18 as "AVERAGE_WW_AVG_BOT_FLOW18",
+            AVG_TOP_FLOW19 as "AVERAGE_WW_AVG_TOP_FLOW19",
+            AVG_BOT_FLOW19 as "AVERAGE_WW_AVG_BOT_FLOW19",
+            AVG_TOP_FLOW20 as "AVERAGE_WW_AVG_TOP_FLOW20",
+            AVG_BOT_FLOW20 as "AVERAGE_WW_AVG_BOT_FLOW20",
+            AVG_TOP_FLOW21 as "AVERAGE_WW_AVG_TOP_FLOW21",
+            AVG_BOT_FLOW21 as "AVERAGE_WW_AVG_BOT_FLOW21",
+            AVG_TOP_FLOW22 as "AVERAGE_WW_AVG_TOP_FLOW22",
+            AVG_BOT_FLOW22 as "AVERAGE_WW_AVG_BOT_FLOW22",
+            AVG_TOP_FLOW23 as "AVERAGE_WW_AVG_TOP_FLOW23",
+            AVG_BOT_FLOW23 as "AVERAGE_WW_AVG_BOT_FLOW23"
+            FROM HSM_AVERAGE_WW_COOLING
+            WHERE HSM_AVERAGE_WW_COOLING.PIECE_ID is not null AND
+            HSM_AVERAGE_WW_COOLING.PIECE_ID IN ({{pieceIdList|join(", ")}})
+script:
+  join:
+    id: JOIN_DFS_EXTERNAL
+    name: Выполнение скрипта объеднинения полученных данных
+    external_script: C:\work\quality_management_systems\asamm\reader\scripts\external_scripts\JOIN_DFS_EXTERNAL.py
