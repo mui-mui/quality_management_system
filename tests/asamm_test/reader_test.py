@@ -1,10 +1,7 @@
-import os
-
-from asamm.reader.loader import Loader
 from asamm import AsammConfiguration
 from utils.executor import SqlExecutor, ScriptExecutor
-from utils.config_parser import read_config
-from asamm.reader.parse_config import SqlBlockConfigParser, ScriptBlockConfigParser
+from utils.config_reader import read_config
+from asamm.parse_config import SqlBlockConfigParser
 
 import cx_Oracle
 # TODO: Переделать!

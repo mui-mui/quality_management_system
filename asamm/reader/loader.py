@@ -1,14 +1,13 @@
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List, Iterable
+from typing import Iterable
 
 from utils.executor import call_result
 from utils.logger import LoggingMixin
 from asamm import exception_handler
-from asamm.reader.parse_config import IConfigParser, ConfigSqlBlock, ConfigScriptBlock
 from utils.executor import *
 
 
-@exception_handler
+
 class Loader(LoggingMixin):
     """
     Класс загрузки данных из БД и их трансформации по скриптам трансформации

@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
-
+from abc import ABC, abstractmethod, abstractproperty
+from typing import Deque
 from utils.logger import LoggingMixin
 
 
@@ -30,6 +30,10 @@ class IObserver(ABC):
 
 
 class ISystemNode(IProducer, IObserver):
+
+    @abstractmethod
+    def get_messages_queue(self) -> Deque:
+        pass
 
     @abstractmethod
     def notify(self):

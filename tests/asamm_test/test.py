@@ -1,35 +1,55 @@
+from asamm.ichecker import IChecker
+from utils.handlers import coroutine, AllExceptionsHandled
 
-class A:
-    abc = 10
+
+@AllExceptionsHandled(logged_call=True)
+class MapperChecker(IChecker):
     """
-    fewfefwe
+    Класс содержит комплекс проверок перед
+    блоком 'Mapper'
     """
-    def __new__(cls, *args, **kwargs):
-        for attr_name in filter(lambda at_name: not str.startswith(at_name, '_'), cls.__dict__):
-            attr = getattr(cls, attr_name)
-            if callable(attr):
-                attr.__doc__ = f"Запуск внешнего скрипта {attr.__name__}"
-        return cls
 
-    def __init__(self):
-        self.a = 10
-        self.b = 20
+    def run_all_checks(self, data_for_checks):
+        super().run_all_checks(data_for_checks)
+        return self.check_res
 
-    def sum(self, name, arg1):
-        return self.a + self.b
+    @coroutine
+    def check1(self, target=None):
+        while True:
+            s = yield
+            self.check_res = s
+            print(f"Check1 Get {s}")
+            if target:
+                target.send(s * s)
 
 
-def test():
-    for i in range(3):
-        x = yield
-        print(i, x)
+    @coroutine
+    def check2(self, target=None):
+        """
+        Проверка чек1
+        """
+        while True:
+            s = yield
+            print(f"Check2 Get {s}")
+            self.check_res = s
+            if target:
+                target.send(s * s)
+
+    @coroutine
+    def check3(self, target=None):
+        while True:
+            s = yield
+            self.check_res = s
+            print(f"Check3 Get {s}")
+            if target:
+                target.send(s * s)
+
 
 if __name__ == '__main__':
-    t = test()
-    t.send(None)
-    t.send(1)
-    t.send(2)
-    t.send(3)
-    t.send(4)
+
+    def f():
+        yield 12
 
 
+    v = list(f())
+    print(v)

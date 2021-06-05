@@ -1,3 +1,4 @@
+from itertools import dropwhile
 from typing import Callable
 
 from utils.logger import LoggingMixin
@@ -27,19 +28,28 @@ class Concatenator(LoggingMixin):
 
 # Example use
 if __name__ == '__main__':
-    d = {'col1': [1, 2], 'col2': ['a', 'b']}
+    d = {'col1': [1, 2, 3], 'col2': ['a', 'b', 'c'], ('col4', 'col5'): ['d', 'e', 'r']}
     df1 = pd.DataFrame(data=d)
 
     d2 = {'col3': [3, 4], 'col2': ['a', 'b']}
     df2 = pd.DataFrame(data=d2)
 
-    d3 = {'col30': [100, 400], 'col2': ['a', 'b']}
+    d3 = {'col30': [100, None], 'col2': ['a', 'b']}
     df3 = pd.DataFrame(data=d3)
 
-    print(df2)
-    df2['col3'] = max(10, 30)
+    #print(df3)
 
-    print(df2)
+    col_not = pd.notnull(df3['col30'])
+    col_null = pd.isnull(df3['col30'])
+    #df3_ = df3.query('col30 != col30')
+
+    #print(df1[('col4', 'col5')])
+
+    for r in (df1.loc[i:i, :] for i in range(0, len(df1), 1)):
+        print(r['col1'].values[0])
+
+
+
     """
     concat = Concatenator.create_pandas_df_concatenator()
     concat \

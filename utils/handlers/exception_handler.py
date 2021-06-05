@@ -49,7 +49,7 @@ class AllExceptionsHandled(LoggingMixin):
                     #if self.logged_call:
                     #    self.info(f"Метод '{method.__name__} выполнен успешно.")
                     return res
-                except self.EXCEPTION_TYPE as e:
+                except self.EXCEPTION_TYPE or GeneratorExit as e:
                     if non_exceptions is not None:
                         for ex in non_exceptions:
                             if isinstance(e, ex): raise e

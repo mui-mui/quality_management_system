@@ -1,4 +1,4 @@
-from asamm.asamm_config import AsammConfiguration
+from asamm.asamm_configuration import AsammConfiguration
 from utils.handlers import AllExceptionsHandled
 
 exception_handler = AllExceptionsHandled(logged_call=True)

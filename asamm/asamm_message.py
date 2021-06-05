@@ -1,9 +1,17 @@
-from enum import Enum
+from typing import List, Any
+
 from dataclasses import dataclass
+from asamm.model import AsammModel
+
 
 @dataclass
 class AsammMessage:
-    COIL_ID: str
-    PREDICTION_MODEL_RESULT: float
-    WORK_MODEL_RESULT_DESCRIPTION: str
+    """
+    Класс для обмена данными между блоками системы АСАММ
+    """
+    models = list()
+    raw_data: Any
+
+    def add_model(self, model: AsammModel):
+        self.models.append(model)
 

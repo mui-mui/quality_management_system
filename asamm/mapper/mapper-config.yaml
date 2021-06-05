@@ -1,0 +1,41 @@
+models:
+- id: soprprod
+  name: Модель с поправочным средним для временного сопротивления на продольном образце, модель для всех марок, сеть перцептрон.
+  model_file: /opt/applications/asamm2.0/model_calculation/models/soprprod/model.py
+  settings_file: /opt/applications/asamm2.0/model_calculation/models/soprprod/soprprod-config.yaml
+- id: soprpoper
+  name: Модель с поправочным средним для временного сопротивления на поперечном образце, модель для всех марок, сеть перцептрон
+  model_file: /opt/applications/asamm2.0/model_calculation/models/soprpoper/model.py
+  settings_file: /opt/applications/asamm2.0/model_calculation/models/soprpoper/soprpoper-config.yaml
+- id: predpoper
+  name: Модель предсказывает предел текучести на поперечных образцах
+  model_file: C:\work\asamm\model_calculation\models\predpoper\model.py
+  settings_file: C:\work\asamm\model_calculation\models\predpoper\predpoper-config.yaml
+- id: predprod
+  name: Модель предсказывает предел текучести на продольных образцах
+  model_file: C:\work\asamm\model_calculation\models\predprod\model.py
+  settings_file: C:\work\asamm\model_calculation\models\predprod\predprod-config.yaml
+- id: udlinenieprod
+  name: Модель предсказывает свойство растяжений, удлинение на продольном образце
+  model_file: C:\work\asamm\model_calculation\models\udlinenieprod\model.py
+  settings_file: C:\work\asamm\model_calculation\models\udlinenieprod\udlprod-config.yaml
+- id: udlineniepoper
+  name: Модель предсказывает свойство растяжения, относительное удлинение на поперечном образце
+  model_file: C:\work\asamm\model_calculation\models\udlineniepoper\model.py
+  settings_file: C:\work\asamm\model_calculation\models\udlineniepoper\udlpoper-config.yaml
+- id: zernob
+  name: Модель предсказывает балл зерна B
+  model_file: C:\work\asamm\model_calculation\models\zernob\model.py
+  settings_file: C:\work\asamm\model_calculation\models\zernob\zernob-config.yaml
+- id: zernom
+  name: Модель предсказывает балл зерна М
+  model_file: C:\work\asamm\model_calculation\models\zernom\model.py
+  settings_file: C:\work\asamm\model_calculation\models\zernom\zernom-config.yaml
+- id: kcu60poper
+  name: Модель ударной вязкости KCU -60 на поперечном образце
+  model_file: C:\work\asamm\model_calculation\models\kcu60poper\model.py
+  settings_file: C:\work\asamm\model_calculation\models\kcu60poper\kcu-60poper-config.yaml
+- id: kcv20poper
+  name: Модель ударной вязкости KCV -20 на поперечном образце
+  model_file: C:\work\asamm\model_calculation\models\kcv20poper\model.py
+  settings_file: C:\work\asamm\model_calculation\models\kcv20poper\kcv-20poper-config.yaml
